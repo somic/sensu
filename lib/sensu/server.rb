@@ -371,6 +371,12 @@ module Sensu
           if check[:aggregate]
             aggregate_result(result)
           end
+          # Allow events to fake their originating source
+          if check[:source]
+            check[:original_source] = client[:name]
+            client[:original_source] = client[:name]
+            client[:name] = check[:source]
+          end
           @redis.sadd('history:' + client[:name], check[:name])
           history_key = 'history:' + client[:name] + ':' + check[:name]
           @redis.rpush(history_key, check[:status]) do
