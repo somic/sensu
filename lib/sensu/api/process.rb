@@ -261,12 +261,18 @@ module Sensu
       end
 
       before do
+        @request_start_time = Time.now
         request_log_line
         content_type "application/json"
         settings.cors.each do |header, value|
           headers["Access-Control-Allow-#{header}"] = value
         end
         protected! unless env["REQUEST_METHOD"] == "OPTIONS"
+      end
+
+      after do
+        settings.logger.info(env["REQUEST_URI"],
+          :time_elapsed => Time.now - @request_start_time)
       end
 
       aoptions "/*" do
